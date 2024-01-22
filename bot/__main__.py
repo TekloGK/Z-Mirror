@@ -24,51 +24,24 @@ from .helper.telegram_helper.bot_commands import BotCommands
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.message_utils import editMessage, sendFile, sendMessage, auto_delete_message
 from .modules import (anonymous, authorize, bot_settings, cancel_mirror,
-                      category_select, clone, eval, gd_count, gd_delete,
-                      gd_search, leech_del, mirror_leech, rmdb, rss,
-                      shell, status, torrent_search,
-                      torrent_select, users_settings, ytdlp)
-
-
-async def start(_, message):
-    if len(message.command) > 1 and len(message.command[1]) == 36:
-        userid = message.from_user.id
-        input_token = message.command[1]
-        if DATABASE_URL:
-            stored_token = await DbManager().get_user_token(userid)
-            if stored_token is None:
-                return await sendMessage(message, 'This token is not associated with your account.\n\nPlease generate your own token.')
-            if input_token != stored_token:
-                return await sendMessage(message, 'Invalid token.\n\nPlease generate a new one.')
-        if userid not in user_data:
-            return await sendMessage(message, 'This token is not yours!\n\nKindly generate your own.')
-        data = user_data[userid]
-        if 'token' not in data or data['token'] != input_token:
-            return await sendMessage(message, 'Token already used!\n\nKindly generate a new one.')
-        token = str(uuid4())
-        ttime = time()
-        data['token'] = token
-        data['time'] = ttime
-        user_data[userid].update(data)
-        if DATABASE_URL:
-            await DbManager().update_user_tdata(userid, token, ttime)
-        msg = 'Token refreshed successfully!\n\n'
-        msg += f'Validity: {get_readable_time(int(config_dict["TOKEN_TIMEOUT"]))}'
-        return await sendMessage(message, msg)
-    elif config_dict['DM_MODE'] and message.chat.type != message.chat.type.SUPERGROUP:
-        start_string = 'Bot Started.\n' \
-                       'Now I will send all of your stuffs here.\n' \
-                       'Use me at: @Z_Mirror'
-    elif not config_dict['DM_MODE'] and message.chat.type != message.chat.type.SUPERGROUP:
-        start_string = 'Sorry, you cannot use me here!\n' \
-                       'Join: @Z_Mirror to use me.\n' \
-                       'Thank You'
+         async def start(client, message):
+    buttons = ButtonMaker()
+    buttons.ubutton("Support", "https://t.me/gk_botz")
+    buttons.ubutton("Owner", "https://t.me/managar_g")
+    reply_markup = buttons.build_menu(2)
+    if await CustomFilters.authorized(client, message):
+        start_string = f"""
+This bot can mirror all your links|files|torrents to Google Drive or any rclone cloud or to telegram.
+Type /{BotCommands.HelpCommand} to get a list of available commands
+"""
+        await sendMessage(message, start_string, reply_markup)
     else:
-        tag = message.from_user.mention
-        start_string = 'Start me in DM, not in the group.\n' \
-                       f'cc: {tag}'
-    await sendMessage(message, start_string)
-
+        await sendMessage(
+            message,
+            "You Are not authorized user! Contact My Owner",
+            reply_markup,
+        )
+             
 
 async def restart(_, message):
     restart_message = await sendMessage(message, "Restarting...")
