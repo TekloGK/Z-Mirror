@@ -24,7 +24,13 @@ from .helper.telegram_helper.bot_commands import BotCommands
 from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.message_utils import editMessage, sendFile, sendMessage, auto_delete_message
 from .modules import (anonymous, authorize, bot_settings, cancel_mirror,
-         async def start(client, message):
+                      category_select, clone, eval, gd_count, gd_delete,
+                      gd_search, leech_del, mirror_leech, rmdb, rss,
+                      shell, status, torrent_search,
+                      torrent_select, users_settings, ytdlp)
+
+
+async def start(client, message):
     buttons = ButtonMaker()
     buttons.ubutton("Support", "https://t.me/gk_botz")
     buttons.ubutton("Owner", "https://t.me/managar_g")
